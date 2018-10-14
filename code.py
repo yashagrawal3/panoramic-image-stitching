@@ -44,7 +44,7 @@ def get_stitched_image(img1, img2, M):
 def get_sift_homography(img1, img2):
 
 	# Initialize SIFT 
-	sift = cv2.SIFT()
+	sift = cv2.xfeatures2d.SIFT_create()
 
 	# Extract keypoints and descriptors
 	k1, d1 = sift.detectAndCompute(img1, None)
@@ -103,8 +103,8 @@ def main():
 	img2 = equalize_histogram_color(img2)
 
 	# Show input images
-	#input_images = np.hstack( (img1, img2) )
-	#cv2.imshow ('Input Images', input_images)
+	input_images = np.hstack( (img1, img2) )
+	cv2.imshow ('Input Images', input_images)
 
 	# Use SIFT to find keypoints and return homography matrix
 	M =  get_sift_homography(img1, img2)
