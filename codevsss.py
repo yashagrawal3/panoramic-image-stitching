@@ -1,7 +1,7 @@
 import sys
 import cv2
 import numpy as np
-
+import urllib
 # Use the keypoints to stitch the images
 def get_stitched_image(img1, img2, M):
 
@@ -28,14 +28,14 @@ def get_stitched_image(img1, img2, M):
 	# Create output array after affine transformation 
 	transform_dist = [-x_min,-y_min]
 	transform_array = np.array([[1, 0, transform_dist[0]], 
-								[0, 1, transform_dist[1]], 
-								[0,0,1]]) 
+		[0, 1, transform_dist[1]], 
+		[0,0,1]]) 
 
 	# Warp images to get the resulting image
 	result_img = cv2.warpPerspective(img2, transform_array.dot(M), 
-									(x_max-x_min, y_max-y_min))
+		(x_max-x_min, y_max-y_min))
 	result_img[transform_dist[1]:w1+transform_dist[1], 
-				transform_dist[0]:h1+transform_dist[0]] = img1
+	transform_dist[0]:h1+transform_dist[0]] = img1
 
 	# Return the result
 	return result_img
@@ -74,9 +74,9 @@ def get_sift_homography(img1, img2):
 		for match in verified_matches:
 			img1_pts.append(k1[match.queryIdx].pt)
 			img2_pts.append(k2[match.trainIdx].pt)
-		img1_pts = np.float32(img1_pts).reshape(-1,1,2)
-		img2_pts = np.float32(img2_pts).reshape(-1,1,2)
-		
+			img1_pts = np.float32(img1_pts).reshape(-1,1,2)
+			img2_pts = np.float32(img2_pts).reshape(-1,1,2)
+
 		# Compute homography matrix
 		M, mask = cv2.findHomography(img1_pts, img2_pts, cv2.RANSAC, 5.0)
 		return M
@@ -94,32 +94,37 @@ def equalize_histogram_color(img):
 # Main function definition
 def main():
 	
-	# Get input set of images
-	img1 = cv2.imread(sys.argv[1])
-	img2 = cv2.imread(sys.argv[2])
-	print type(img1)
-	# Equalize histogram
+	# cap = cv2.VideoCapture(0)
+	# capture = cv2.VideoCapture('http://192.168.43.1:8080/')
+	url = 'http://192.168.43.1:8080/shot.jpg'
+	url1 = 'http://192.168.43.198:8080/shot.jpg'
+	imgResp = urllib.urlopen(url)
+	imgResp1 = urllib.urlopen(url1)
+	imgNp = np.array(bytearray(imgResp.read()),dtype=np.uint8)
+	imgNp1 = np.array(bytearray(imgResp1.read()),dtype=np.uint8)
+	img1 = cv2.imdecode(imgNp,-1)
+	img2 = cv2.imdecode(imgNp1,-1)
 	img1 = equalize_histogram_color(img1)
 	img2 = equalize_histogram_color(img2)
-
-	# Show input images
-	input_images = np.hstack( (img1, img2) )
-	cv2.imshow ('Input Images', input_images)
-
-	# Use SIFT to find keypoints and return homography matrix
+	print "sssucc"
 	M =  get_sift_homography(img1, img2)
-
-	# Stitch the images together using homography matrix
 	result_image = get_stitched_image(img2, img1, M)
-
-	# Write the result to the same directory
 	result_image_name = 'results/result_'+sys.argv[1]
-	cv2.imwrite(result_image_name, result_image)
+	while(True):
+		cv2.imwrite(result_image_name, result_image)
+		cv2.imshow ('Result', result_image)
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
 
-	# Show the resulting image
-	cv2.imshow ('Result', result_image)
-	cv2.waitKey()
+	# When everything done, release the capture
+	# cap.release()
+	cv2.destroyAllWindows()
 
 # Call main function
 if __name__=='__main__':
 	main()
+
+# cv2.imshow('frame', frame)
+# img1 = cv2.imread(sys.argv[1])
+# img2 = frame
+# img2 = frame1
