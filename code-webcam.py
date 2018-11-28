@@ -97,39 +97,20 @@ def main():
         timeout = time.time() + 60*5
 	cap1 = cv2.VideoCapture(1)
 	cap2 = cv2.VideoCapture(2)
-	# capture = cv2.VideoCapture('http://192.168.43.1:8080/')
-	#url = 'http://192.168.43.1:8080/shot.jpg'
-	#url1 = 'http://192.168.43.198:8080/shot.jpg'
+	
 	while(True):
 	    # Capture frame-by-frame
             ret, frame = cap1.read()
 	    ret1, frame1 = cap2.read()
-
-            # Use urllib to get the image from the IP camera
-	    #imgResp = urllib.urlopen(url)
-	    #imgResp1 = urllib.urlopen(url1)
-	    
-	    # Numpy to convert into a array
-	    #imgNp = np.array(bytearray(frame1.read()),dtype=np.uint8)
-	    #imgNp1 = np.array(bytearray(frame2.read()),dtype=np.uint8)
-	    
-	    # Finally decode the array to OpenCV usable format ;) 
-	    #img1 = cv2.imdecode(imgNp,-1)
-	    #img2 = cv2.imdecode(imgNp1,-1)
-	    # Our operations on the frame come here
-	    # print type(frame)    
-	    # Display the resulting frame
-	    # cv2.imshow('frame', frame)
-	    # img1 = cv2.imread(sys.argv[1])
+	
 	    img1 = frame
 	    img2 = frame1
-	    #img1 = equalize_histogram_color(img1)
-	    #img2 = equalize_histogram_color(img2)
-	    print "sssucc"
+	    img1 = equalize_histogram_color(img1)
+	    img2 = equalize_histogram_color(img2)
+	    print "success"
 	    M =  get_sift_homography(img1, img2)
 	    result_image = get_stitched_image(img2, img1, M)
-	    #result_image_name = 'results/result_'+sys.argv[1]
-	    #cv2.imwrite(result_image_name, result_image)
+	   
 	    cv2.imshow ('Result', result_image)
 	    if cv2.waitKey(1) & 0xFF == ord('q'):
 	        break
